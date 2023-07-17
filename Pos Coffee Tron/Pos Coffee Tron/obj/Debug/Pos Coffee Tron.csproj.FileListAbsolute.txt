@@ -1,0 +1,10 @@
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\bin\Debug\Pos Coffee Tron.exe.config
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\bin\Debug\Pos Coffee Tron.exe
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\bin\Debug\Pos Coffee Tron.pdb
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.csproj.AssemblyReference.cache
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.csproj.SuggestedBindingRedirects.cache
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos_Coffee_Tron.Properties.Resources.resources
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.csproj.GenerateResource.cache
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.csproj.CoreCompileInputs.cache
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.exe
+E:\MTA 98-361\pos_tron\Pos Coffee Tron\Pos Coffee Tron\obj\Debug\Pos Coffee Tron.pdb
