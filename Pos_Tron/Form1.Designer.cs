@@ -176,7 +176,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1114, 882);
+            this.ClientSize = new System.Drawing.Size(1114, 828);
             this.Controls.Add(this.panelLogo);
             this.Controls.Add(this.totalSold);
             this.Controls.Add(this.label3);

@@ -19,6 +19,7 @@ namespace Pos_Tron
         public Form1()
         {
             InitializeComponent();
+            this.Icon = Properties.Resources.Icon;
         }
 
         //Tọa độ x,y của dòng trong panelOrder
