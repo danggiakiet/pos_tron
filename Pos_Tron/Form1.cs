@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace Pos_Tron
 {
@@ -21,17 +22,17 @@ namespace Pos_Tron
         }
 
         //Tọa độ x,y của dòng trong panelOrder
-        public int toaDoXNewRowPanelOrder = 13;
+        private int toaDoXNewRowPanelOrder = 13;
 
-        public int toaDoYNewRowPanelOrder = 62;
+        private int toaDoYNewRowPanelOrder = 62;
 
         // Tạo danh sách Menu rỗng để chứa dữ liệu
         private List<doUong> Menu = new List<doUong>();
 
         //tạo danh sách chứa số lượng đã bán
-        public Dictionary<string, int> soldList = new Dictionary<string, int>();
+        private Dictionary<string, int> soldList = new Dictionary<string, int>();
 
-        public Dictionary<string, int> soldListtemp = new Dictionary<string, int>();
+        private Dictionary<string, int> soldListtemp = new Dictionary<string, int>();
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -55,35 +56,102 @@ namespace Pos_Tron
                     Menu.Add(doUong);
                 }
             }
-
-            int c = 1;
+            //Khởi tạo tọa độ x, y cho button trong panel Menu
+            //Khởi tạo biến đếm index để xác định thứ tự đồ uống trong menu
+            //Khởi tạo biến đếm để xác định vị trí button trong panel menu
+            int x = 14; int y = 79; int index = 0; int count = 0;
+            //Cho duyệt từng đồ uống trong menu
             foreach (doUong a in Menu)
             {
-                string textBoxName = "textBox" + c;
-                TextBox textBox = Controls.Find(textBoxName, true).FirstOrDefault() as TextBox;
-                if (textBox != null)
+                //Nếu vị trí button chia hết cho 3 và thứ tự lớn hơn 0 thì cho đặt lại tọa độ x,y
+                if (count % 3 == 0 && index > 0)
                 {
-                    textBox.TextAlign = HorizontalAlignment.Center;
-                    textBox.Text = a.Ten;
+                    x = 14;
+                    y = y + 270;
+                    count = 0;
                 }
-                c++;
+                //Gọi hàm thêm button vào panelmenu
+                addButtonToPanelMenu(x, y, a.Ten, index);
+                //Tăng vị trí tọa độ x
+                x = x + 200;
+                //tăng biến đếm vị trí
+                count++;
+                //tăng thứ tự đồ uống
+                index++;
             }
+            //Thêm logo
+            panelLogo.BackgroundImage = Image.FromFile("Img/Logo Tròn.png");
         }
 
-        public int TinhTongGia()
+        private int TinhTongGia()
         {
+            //Khởi tạo giá trị tổng giá tiền
             int tongGia = 0;
+            //cho duyệt tất cả các phần tử trong panel oder
             foreach (Control control in PanelOrder.Controls)
             {
+                //Nếu panel là textbox và tên của textbox khác "name" thì lấy
                 if (control is TextBox && control.Name != "Name")
                 {
+                    //tạo textBox chứa giá trị của textbox price trong panel order
                     TextBox priceTextBox = (TextBox)control;
+                    //tạo biến int giá
                     int gia = 0;
+                    //chuyển giá trị trong textbox price thành kiểu int
                     int.TryParse(priceTextBox.Text.Replace(".", ""), out gia); // Chuyển đổi và xóa dấu phân cách hàng đơn vị
+                    //tính tổng giá tiền trong panel order
                     tongGia += gia;
                 }
             }
+            //Xuất giá trị tổng
             return tongGia;
+        }
+
+        private void addButtonToPanelMenu(int x, int y, string Name, int index)
+        {
+            //Khởi tạo textBox trong panel bao gồm text, độ rộng, chiều cao và vị trí
+            TextBox textBox = new TextBox();
+            textBox.Text = Name;
+            //Căn chỉnh text cho textBox
+            textBox.TextAlign = HorizontalAlignment.Center;
+            //Chỉnh readOnly cho textBox
+            textBox.ReadOnly = true;
+            textBox.Width = 180;
+            textBox.Height = 32;
+            textBox.Location = new Point(x, y + 218);
+            //Thêm textBox vào panelOrder
+            PanelMenu.Controls.Add(textBox);
+
+            //Khởi tạo đường dẫn đến vị trí ảnh đồ uống
+            string path = $"Img/{Name}.png";
+            //Khởi tạo button trong panel bao gồm background, name, độ rộng, chiều cao và vị trí
+            Button button = new Button();
+            button.BackgroundImage = Image.FromFile(path);
+            button.Name = Name;
+            button.Width = 180;
+            button.Height = 250;
+            button.Location = new Point(x, y);
+            //Thêm button vào panelOrder
+            PanelMenu.Controls.Add(button);
+
+            //Thêm hàm click cho button
+            button.Click += (sender, e) => buttonPanelMenu_Click(index);
+        }
+
+        private void buttonPanelMenu_Click(int index)
+        {
+            try
+            {
+                doUong doUong = Menu[index];
+                //Thêm 1 dòng vào panelOrder
+                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
+                //chỉnh tọa độ cho dòng tiếp theo
+                toaDoYNewRowPanelOrder += 39;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public void themDongPanelOrder(int x, int y, string Ten, int Gia)
@@ -108,7 +176,7 @@ namespace Pos_Tron
             Price.Height = 32;
             Price.Text = (Gia * Quantity.Value).ToString("N0");
             PanelOrder.Controls.Add(Price); // Thêm ô textbox vào panel
-                                            //Thay đổi giá trị ô price theo số lượng
+            //Thay đổi giá trị ô price theo số lượng
             Quantity.ValueChanged += (sender, e) =>
             {
                 NumericUpDown quantityTextBox = (NumericUpDown)sender;
@@ -153,42 +221,6 @@ namespace Pos_Tron
             }
         }
 
-        public void saveSoldListTemp(Dictionary<string, int> soldListtemp, Dictionary<string, int> soldList)
-        {
-            foreach (var item in soldListtemp)
-            {
-                if (!soldList.ContainsKey(item.Key))
-                {
-                    soldList.Add(item.Key, item.Value);
-                }
-                else
-                {
-                    soldList[item.Key] = soldList[item.Key] + item.Value;
-                }
-            }
-        }
-
-        private void ClearPanelChotDon()
-        {
-            List<Control> controlsToRemove = new List<Control>();
-
-            // Tìm và thêm các control TextBox và NumericUpDown vào danh sách controlsToRemove
-            foreach (Control control in panelChotDon.Controls)
-            {
-                if (control is TextBox || control is Label)
-                {
-                    controlsToRemove.Add(control);
-                }
-            }
-
-            // Xóa các control từ danh sách controlsToRemove và giải phóng tài nguyên của chúng
-            foreach (Control control in controlsToRemove)
-            {
-                control.Dispose();
-                panelChotDon.Controls.Remove(control);
-            }
-        }
-
         private void btnClear_Click(object sender, EventArgs e)
         {
             List<Control> controlsToRemove = new List<Control>();
@@ -214,147 +246,39 @@ namespace Pos_Tron
             soldListtemp.Clear();
         }
 
-        public void button1_Click(object sender, EventArgs e)
+        private void ClearPanelChotDon()
         {
-            try
+            List<Control> controlsToRemove = new List<Control>();
+
+            // Tìm và thêm các control TextBox và NumericUpDown vào danh sách controlsToRemove
+            foreach (Control control in panelChotDon.Controls)
             {
-                doUong doUong = Menu[0];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
+                if (control is TextBox || control is Label)
+                {
+                    controlsToRemove.Add(control);
+                }
             }
-            catch (Exception ex)
+
+            // Xóa các control từ danh sách controlsToRemove và giải phóng tài nguyên của chúng
+            foreach (Control control in controlsToRemove)
             {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                control.Dispose();
+                panelChotDon.Controls.Remove(control);
             }
         }
 
-        public void button2_Click(object sender, EventArgs e)
+        public void saveSoldListTemp(Dictionary<string, int> soldListtemp, Dictionary<string, int> soldList)
         {
-            try
+            foreach (var item in soldListtemp)
             {
-                doUong doUong = Menu[1];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button3_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[2];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button4_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[3];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button5_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[4];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button6_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[5];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button7_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[6];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button8_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[7];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        public void button9_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                doUong doUong = Menu[8];
-                //Thêm 1 dòng vào panelOrder
-                themDongPanelOrder(toaDoXNewRowPanelOrder, toaDoYNewRowPanelOrder, doUong.Ten, doUong.Price);
-                //chỉnh tọa độ cho dòng tiếp theo
-                toaDoYNewRowPanelOrder += 39;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hình như có lỗi gì rồi đó !!!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!soldList.ContainsKey(item.Key))
+                {
+                    soldList.Add(item.Key, item.Value);
+                }
+                else
+                {
+                    soldList[item.Key] = soldList[item.Key] + item.Value;
+                }
             }
         }
 
@@ -362,7 +286,13 @@ namespace Pos_Tron
         {
             try
             {
-                ClearPanelChotDon();
+                foreach (Control control in panelChotDon.Controls)
+                {
+                    if (!(control is Label && control.Name == "labelDaBan"))
+                    {
+                        ClearPanelChotDon();
+                    }
+                }
                 saveSoldListTemp(soldListtemp, soldList);
                 themDongPanelChotDon(Menu, soldList);
                 totalSold.Text = TinhTongLy();

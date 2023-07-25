@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ButtonPanelMenu.cs" />
     <Compile Include="doUong.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
